@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
 import unittest
 from unittest.mock import patch
 from parameterized import parameterized
-from client import GithubOrgClient  # make sure this path is correct
+from client import GithubOrgClient  # Make sure this matches your actual module
 
 class TestGithubOrgClient(unittest.TestCase):
 
