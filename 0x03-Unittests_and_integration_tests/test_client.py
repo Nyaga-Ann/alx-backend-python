@@ -2,23 +2,23 @@
 import unittest
 from unittest.mock import patch
 from parameterized import parameterized
-from client import GithubOrgClient  # Make sure this matches your actual module
+from client import GithubOrgClient
+
 
 class TestGithubOrgClient(unittest.TestCase):
+    """Test class for GithubOrgClient"""
 
     @parameterized.expand([
         ("google",),
-        ("abc",)
+        ("abc",),
     ])
-    @patch('client.get_json')
+    @patch('client.GithubOrgClient.get_json')
     def test_org(self, org_name, mock_get_json):
-        """Test that GithubOrgClient.org returns correct value."""
-        expected_result = {"login": org_name}
-        mock_get_json.return_value = expected_result
+        """Test that GithubOrgClient.org returns correct value"""
+        test_payload = {'login': org_name}
+        mock_get_json.return_value = test_payload
 
         client = GithubOrgClient(org_name)
-        result = client.org
-
+        self.assertEqual(client.org, test_payload)
         mock_get_json.assert_called_once_with(f"https://api.github.com/orgs/{org_name}")
-        self.assertEqual(result, expected_result)
 
