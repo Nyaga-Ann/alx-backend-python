@@ -71,7 +71,7 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(result, expected)
 
 
-@parameterized_class((
+@parameterized_class((  # integration tests using inlined payloads
     "org_payload",
     "repos_payload",
     "expected_repos",
