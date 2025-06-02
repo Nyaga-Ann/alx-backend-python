@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import patch, PropertyMock
 from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
+from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -80,19 +81,10 @@ class TestGithubOrgClient(unittest.TestCase):
     "apache2_repos"
 ), [
     (
-        {
-            "login": "google",
-            "id": 1,
-            "url": "https://api.github.com/orgs/google",
-            "repos_url": "https://api.github.com/orgs/google/repos"
-        },
-        [
-            {"name": "repo1", "license": {"key": "apache-2.0"}},
-            {"name": "repo2", "license": {"key": "mit"}},
-            {"name": "repo3", "license": {"key": "apache-2.0"}},
-        ],
-        ["repo1", "repo2", "repo3"],
-        ["repo1", "repo3"]
+        org_payload,
+        repos_payload,
+        expected_repos,
+        apache2_repos
     )
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
@@ -109,9 +101,9 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
                 def json(self):
                     return self._json_data
 
-            if url.endswith("/orgs/google"):
+            if url == cls.org_payload["url"]:
                 return MockResponse(cls.org_payload)
-            elif url.endswith("/orgs/google/repos"):
+            elif url == cls.org_payload["repos_url"]:
                 return MockResponse(cls.repos_payload)
             return MockResponse(None)
 
