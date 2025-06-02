@@ -5,7 +5,6 @@ import unittest
 from unittest.mock import patch, PropertyMock
 from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
-import requests
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -71,29 +70,20 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(result, expected)
 
 
-@parameterized_class([
-    {
-        "org_payload": {
-            "login": "google",
-            "id": 1,
-            "url": "https://api.github.com/orgs/google",
-            "repos_url": "https://api.github.com/orgs/google/repos"
-        },
-        "repos_payload": [
-            {"name": "repo1", "license": {"key": "apache-2.0"}},
-            {"name": "repo2", "license": {"key": "mit"}},
-            {"name": "repo3", "license": {"key": "apache-2.0"}},
-        ],
-        "expected_repos": ["repo1", "repo2", "repo3"],
-        "apache2_repos": ["repo1", "repo3"]
-    }
+@parameterized_class((
+    "org_payload",
+    "repos_payload",
+    "expected_repos",
+    "apache2_repos"
+), [
+    # Leave this blank – ALX will inject these fixtures
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Integration tests for GithubOrgClient.public_repos"""
 
     @classmethod
     def setUpClass(cls):
-        """Set up the mock for requests.get using inlined payloads"""
+        """Set up the mock for requests.get using ALX fixtures"""
 
         def mocked_get(url):
             class MockResponse:
@@ -129,3 +119,4 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             client.public_repos(license="apache-2.0"),
             self.apache2_repos
         )
+
