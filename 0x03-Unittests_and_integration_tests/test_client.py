@@ -5,7 +5,6 @@ import unittest
 from unittest.mock import patch, PropertyMock
 from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
-import fixtures
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -79,10 +78,19 @@ class TestGithubOrgClient(unittest.TestCase):
     "apache2_repos"
 ), [
     (
-        fixtures.org_payload,
-        fixtures.repos_payload,
-        fixtures.expected_repos,
-        fixtures.apache2_repos
+        {
+            "login": "google",
+            "id": 1,
+            "url": "https://api.github.com/orgs/google",
+            "repos_url": "https://api.github.com/orgs/google/repos"
+        },
+        [
+            {"name": "repo1", "license": {"key": "apache-2.0"}},
+            {"name": "repo2", "license": {"key": "mit"}},
+            {"name": "repo3", "license": {"key": "apache-2.0"}},
+        ],
+        ["repo1", "repo2", "repo3"],
+        ["repo1", "repo3"]
     )
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
@@ -90,7 +98,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Set up the mock for requests.get using fixtures"""
+        """Set up the mock for requests.get using inlined payloads"""
         def mocked_get(url):
             class MockResponse:
                 def __init__(self, json_data):
