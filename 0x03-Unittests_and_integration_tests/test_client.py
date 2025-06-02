@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch, PropertyMock
 from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
-from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
+import requests
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -57,10 +57,7 @@ class TestGithubOrgClient(unittest.TestCase):
 
             client = GithubOrgClient("google")
             repos = client.public_repos()
-            self.assertEqual(
-                repos,
-                ["repo1", "repo2", "repo3"]
-            )
+            self.assertEqual(repos, ["repo1", "repo2", "repo3"])
             mock_get_json.assert_called_once()
             mock_url.assert_called_once()
 
@@ -74,18 +71,22 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(result, expected)
 
 
-@parameterized_class((
-    "org_payload",
-    "repos_payload",
-    "expected_repos",
-    "apache2_repos"
-), [
-    (
-        org_payload,
-        repos_payload,
-        expected_repos,
-        apache2_repos
-    )
+@parameterized_class([
+    {
+        "org_payload": {
+            "login": "google",
+            "id": 1,
+            "url": "https://api.github.com/orgs/google",
+            "repos_url": "https://api.github.com/orgs/google/repos"
+        },
+        "repos_payload": [
+            {"name": "repo1", "license": {"key": "apache-2.0"}},
+            {"name": "repo2", "license": {"key": "mit"}},
+            {"name": "repo3", "license": {"key": "apache-2.0"}},
+        ],
+        "expected_repos": ["repo1", "repo2", "repo3"],
+        "apache2_repos": ["repo1", "repo3"]
+    }
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Integration tests for GithubOrgClient.public_repos"""
@@ -93,6 +94,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up the mock for requests.get using inlined payloads"""
+
         def mocked_get(url):
             class MockResponse:
                 def __init__(self, json_data):
