@@ -86,7 +86,7 @@ class TestGithubOrgClient(unittest.TestCase):
         [
             {"name": "repo1", "license": {"key": "apache-2.0"}},
             {"name": "repo2", "license": {"key": "mit"}},
-            {"name": "repo3", "license": {"key": "apache-2.0"}},
+            {"name": "repo3", "license": {"key": "apache-2.0"}}
         ],
         ["repo1", "repo2", "repo3"],
         ["repo1", "repo3"]
@@ -97,7 +97,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Set up the mock for requests.get using ALX fixtures"""
+        """Set up the mock for requests.get using inlined payloads"""
 
         def mocked_get(url):
             class MockResponse:
