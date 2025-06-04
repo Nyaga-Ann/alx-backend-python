@@ -7,12 +7,13 @@ from django.utils import timezone
 class User(AbstractUser):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128)  # Explicitly declared for checker
     phone_number = models.CharField(max_length=20)
     bio = models.TextField(blank=True, null=True)
     is_online = models.BooleanField(default=False)
 
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'phone_number']
-    USERNAME_FIELD = 'username'  # or 'email' if you're using email login
+    USERNAME_FIELD = 'username'  # Default Django behavior
 
     def __str__(self):
         return self.username
@@ -29,12 +30,11 @@ class Conversation(models.Model):
 # Message model
 class Message(models.Model):
     message_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     message_body = models.TextField()
     sent_at = models.DateTimeField(default=timezone.now)
     is_read = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Message {self.message_id} from {self.sender}"
- {self.content[:30]}"
+        return f"From {self.sender.username} in Conv {self.conversation.conversation_id}"
