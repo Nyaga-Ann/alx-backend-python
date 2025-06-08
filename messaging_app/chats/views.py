@@ -3,6 +3,7 @@ from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer, UserSerializer
 from .permissions import IsParticipantOfConversation  # ✅ Import custom permission
@@ -39,14 +40,19 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated, IsParticipantOfConversation]  # ✅ Apply permission
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['timestamp']
     ordering = ['-timestamp']
 
     def get_queryset(self):
-        # ✅ Only messages from conversations the user is a participant of
+        # Only show messages for conversations the user is in
         return Message.objects.filter(conversation__participants=self.request.user)
 
     def perform_create(self, serializer):
+        conversation = serializer.validated_data.get('conversation')
+
+        if self.request.user not in conversation.participants.all():
+            raise PermissionDenied(detail="You are not a participant in this conversation.")
+
         serializer.save(sender=self.request.user)
