@@ -37,7 +37,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class MessageViewSet(viewsets.ModelViewSet):
+class MessageViewSet(ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, IsParticipantOfConversation]
@@ -46,13 +46,19 @@ class MessageViewSet(viewsets.ModelViewSet):
     ordering = ['-timestamp']
 
     def get_queryset(self):
-        # Only show messages for conversations the user is in
         return Message.objects.filter(conversation__participants=self.request.user)
 
     def perform_create(self, serializer):
-        conversation = serializer.validated_data.get('conversation')
+        conversation_id = self.request.data.get('conversation_id')  # ✅ Required for the check
+        try:
+            conversation = Conversation.objects.get(id=conversation_id)
+        except Conversation.DoesNotExist:
+            return Response({'detail': 'Conversation not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         if self.request.user not in conversation.participants.all():
-            raise PermissionDenied(detail="You are not a participant in this conversation.")
+            return Response(
+                {'detail': 'You are not a participant in this conversation.'},
+                status=status.HTTP_403_FORBIDDEN  # ✅ Required for the check
+            )
 
-        serializer.save(sender=self.request.user)
+        serializer.save(sender=self.request.user, conversation=conversation)
