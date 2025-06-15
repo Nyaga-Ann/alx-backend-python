@@ -45,3 +45,8 @@ def conversation_view(request, user_id):
 
     context = {'threaded_conversations': threaded_conversations}
     return render(request, 'conversation.html', context)
+
+def inbox(request):
+    unread_messages = Message.unread.for_user(request.user)
+    context = {'unread_messages': unread_messages}
+    return render(request, 'inbox.html', context)
